@@ -40,6 +40,27 @@ import sys
 
 from colorama import *
 
+class YamlStore(object):
+
+    def __init__(self, filename):
+        self.filename = filename
+
+    def load(self):
+
+        if path.exists(self.filename):
+            with open(self.filename) as f:
+                data = yaml.load(f)
+
+        else:
+            data = {'work': [], 'interrupt_stack': []}
+
+        return data
+
+    def dump(self, data):
+        with open(self.filename, 'w') as f:
+            yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
+
+
 class JsonStore(object):
 
     def __init__(self, filename):
@@ -249,6 +270,8 @@ def action_edit():
         f.write(yml.replace('\n- ', '\n\n- '))
         f.seek(0)
         subprocess.check_call(cmd + ' ' + temp_path, shell=True)
+
+    with open(temp_path, "r+") as f:
         yml = f.read()
         f.truncate()
         f.close
@@ -426,7 +449,7 @@ def main():
     fn(**args)
 
 
-store = JsonStore(os.getenv('SHEET_FILE', None) or
+store = YamlStore(os.getenv('SHEET_FILE', None) or
                     os.path.expanduser('~/.ti-sheet'))
 
 if __name__ == '__main__':
